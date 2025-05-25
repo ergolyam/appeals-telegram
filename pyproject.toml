@@ -1,0 +1,15 @@
+[project]
+name = "appeals-telegram"
+version = "0.1.0"
+description = "Async Telegram bot that lets citizens create appeals and check their status via the FastAPI REST backend."
+readme = "readme.md"
+requires-python = ">=3.12"
+dependencies = [
+    "httpx>=0.28.1",
+    "pyrofork>=2.3.63",
+    "tgcrypto-pyrofork>=1.2.7",
+]
+
+[tool.pyright]
+venvPath = '.'
+venv = '.venv'

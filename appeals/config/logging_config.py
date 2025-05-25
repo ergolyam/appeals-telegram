@@ -25,7 +25,7 @@ class FileFormatter(logging.Formatter):
         message = super().format(record)
         return f"{record.asctime} - {record.levelname}: {filename}:{record.lineno} {message}"
 
-def setup_logging(name='my_app', log_file='/tmp/downloader_tg_py.log'):
+def setup_logging(name='my_app', log_file='/tmp/appeals-telegram.log'):
     logger = logging.getLogger(name)
     logger.setLevel(logging.DEBUG)
     if not logger.handlers:

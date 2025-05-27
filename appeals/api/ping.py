@@ -1,4 +1,4 @@
-from appeals.api.common import Common
+from appeals.core.common import Common
 from appeals.config.config import Config
 
 

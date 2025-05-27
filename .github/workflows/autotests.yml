@@ -1,0 +1,43 @@
+name: Run autotests
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+    paths-ignore:
+      - 'readme.md'
+  workflow_dispatch:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/astral-sh/uv:python3.12-alpine
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          path: telegram
+
+      - name: Checkout backend
+        uses: actions/checkout@v4
+        with:
+          repository: grisha765/appeals-backend
+          ref: main
+          path: backend
+
+      - name: Run backend
+        env:
+          DB_PATH: ":memory:"
+        run: uv run appeals &
+        working-directory: backend
+
+      - name: Run tests
+        env:
+          TEST_SESSION: ${{ secrets.TEST_SESSION }}
+          TEST_CHAT_ID: ${{ secrets.TEST_CHAT_ID }}
+        run: uv run appeals
+        working-directory: telegram
+

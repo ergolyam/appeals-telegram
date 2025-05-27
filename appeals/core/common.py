@@ -1,6 +1,8 @@
-import httpx
+import httpx, asyncio
 from enum import Enum
+from typing import cast
 from pyrogram.types import InlineKeyboardButton
+from pyrogram.errors import FloodWait
 
 
 class Common():
@@ -36,6 +38,17 @@ class ConversionStatus(Enum):
 
     def __str__(self) -> str:
         return self.code
+
+
+
+async def safe_call(func, *args, **kwargs):
+    for _ in range(5):
+        try:
+            return await func(*args, **kwargs)
+        except FloodWait as e:
+            wait_sec: int = cast(int, e.value)
+            await asyncio.sleep(wait_sec + 1)
+    raise
 
 
 if __name__ == "__main__":

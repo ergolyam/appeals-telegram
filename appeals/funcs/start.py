@@ -1,6 +1,9 @@
 from pyrogram.types import InlineKeyboardMarkup
-from appeals.core.common import Buttons, Common
-
+from appeals.core.common import (
+    Buttons,
+    Common,
+    safe_call
+)
 
 async def start_command(message):
     user = message.from_user
@@ -9,12 +12,14 @@ async def start_command(message):
     buttons = []
     buttons.append([Buttons.create_conversion, Buttons.conversions_list])
     if getattr(message, 'data', None) is not None:
-        await message.message.edit_text(
+        await safe_call(
+            message.message.edit_text,
             text="Здравствуйте! Выберите действие:",
             reply_markup=InlineKeyboardMarkup(buttons)
         )
     else:
-        await message.reply_text(
+        await safe_call(
+            message.reply_text,
             text="Здравствуйте! Выберите действие:",
             reply_markup=InlineKeyboardMarkup(buttons)
         )

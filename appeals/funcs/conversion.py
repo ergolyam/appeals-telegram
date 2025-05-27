@@ -5,7 +5,8 @@ from pyrogram.types import (
 from appeals.core.common import (
     Common,
     Buttons,
-    ConversionStatus
+    ConversionStatus,
+    safe_call
 )
 from appeals.api.conversion import (
     post_conversion,
@@ -21,7 +22,8 @@ async def create_conversion(_, callback_query):
     buttons = []
     buttons.append([Buttons.back_to_menu])
     Common.waiting_for_input[user.id] = {"step": "head"}
-    await callback_query.message.reply(
+    await safe_call(
+        callback_query.message.reply,
         text="Введите <b>заголовок</b> (до 32 символов):",
         reply_markup=InlineKeyboardMarkup(buttons)
     )
@@ -33,7 +35,10 @@ async def create_conversion_text(_, message):
     state = Common.waiting_for_input.get(user.id)
 
     if not state:
-        await message.reply("Введите /start, чтобы начать.")
+        await safe_call(
+            message.reply,
+            text="Введите /start, чтобы начать."
+        )
         return
 
     if state["step"] == "head":
@@ -42,15 +47,15 @@ async def create_conversion_text(_, message):
         buttons.append([Buttons.back_to_menu])
 
         if len(head) > 32:
-            await message.reply(
-                "❗️ Заголовок слишком длинный"
-                "(максимум 32 символа)."
-                "Попробуйте ещё раз."
+            await safe_call(
+                message.reply,
+                text="❗️ Заголовок слишком длинный (максимум 32 символа). Попробуйте ещё раз."
             )
             return
 
         state.update({"step": "text", "head": head})
-        await message.reply(
+        await safe_call(
+            message.reply,
             text="Теперь введите <b>основное сообщение</b>:",
             reply_markup=InlineKeyboardMarkup(buttons)
         )
@@ -67,7 +72,10 @@ async def create_conversion_text(_, message):
         )
         logging.debug(f"{user.id} - response: {r}")
 
-        await message.reply("✅ Сообщение обработано!")
+        await safe_call(
+            message.reply,
+            text="✅ Сообщение обработано!"
+        )
         Common.waiting_for_input.pop(user.id, None)
         return
 
@@ -88,7 +96,8 @@ async def conversions_list(_, callback_query):
         )
     buttons.append([Buttons.back_to_menu])
     
-    await callback_query.message.edit_text(
+    await safe_call(
+        callback_query.message.edit_text,
         text="Ваши обращения:",
         reply_markup=InlineKeyboardMarkup(buttons)
     )
@@ -106,7 +115,8 @@ async def conversions_view(_, callback_query):
     )
     logging.debug(f"{user.id} - response: {r}")
     text = r[0].get("text")
-    await callback_query.message.edit_text(
+    await safe_call(
+        callback_query.message.edit_text,
         text=text,
         reply_markup=InlineKeyboardMarkup(buttons)
     )

@@ -1,10 +1,15 @@
 import pyrogram.filters
 import pyrogram.handlers.message_handler
 from appeals.funcs.ping import ping_command
-from appeals.funcs.start import start_command
+from appeals.funcs.start import (
+    start_msg,
+    start_cb
+)
 from appeals.funcs.conversion import (
-        create_conversion,
-        create_conversion_text
+    create_conversion,
+    create_conversion_text,
+    conversions_list,
+    conversions_view
 )
 
 
@@ -18,15 +23,33 @@ def init_handlers(app):
     )
     app.add_handler(
         pyrogram.handlers.message_handler.MessageHandler(
-            start_command,
+            start_msg,
             pyrogram.filters.command("start") &
                 pyrogram.filters.private
         )
     )
     app.add_handler(
         pyrogram.handlers.callback_query_handler.CallbackQueryHandler(
+            start_cb,
+            pyrogram.filters.regex("^back_to_menu$")
+        )
+    )
+    app.add_handler(
+        pyrogram.handlers.callback_query_handler.CallbackQueryHandler(
             create_conversion,
             pyrogram.filters.regex("^create_conversion$")
+        )
+    )
+    app.add_handler(
+        pyrogram.handlers.callback_query_handler.CallbackQueryHandler(
+            conversions_list,
+            pyrogram.filters.regex("^conversions_list$")
+        )
+    )
+    app.add_handler(
+        pyrogram.handlers.callback_query_handler.CallbackQueryHandler(
+            conversions_view,
+            pyrogram.filters.regex(r"^conv:(\d+)$")
         )
     )
     app.add_handler(

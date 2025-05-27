@@ -7,6 +7,8 @@ class Config:
     tg_token: str = 'None'
     db_path: str = 'data.db'
     api_address: str = 'http://127.0.0.1:8000'
+    test_session: str = 'None'
+    test_chat_id: int = 0
     
     @classmethod
     def load_from_env(cls):

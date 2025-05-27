@@ -4,6 +4,7 @@ from appeals.config import logging_config
 from appeals.config.config import Config
 
 from appeals.tests.test_ping import test_ping
+from appeals.tests.test_conversions import test_conversions
 
 
 async def run():
@@ -37,6 +38,7 @@ async def run():
     try:
         logging.info(f'Start tests...')
         await test_ping(test_app)
+        await test_conversions(test_app)
     finally:
         logging.info(f'All tests completed! [Errors: {error_count}, Warnings: {warning_count}, Passed: {passed_count}]')
 

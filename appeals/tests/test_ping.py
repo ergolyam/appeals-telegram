@@ -1,10 +1,8 @@
 import asyncio
-from pyrogram.client import Client
-
-from appeals.funcs.ping import ping_command
-
 from appeals.config.config import Config
 from appeals.config import logging_config
+
+from appeals.funcs.ping import ping_command
 
 
 async def ping_reset(logger, app):
@@ -107,16 +105,9 @@ async def ping_get(logger, app):
         raise
 
 
-async def test_ping():
+async def test_ping(app):
     logger = logging_config.setup_logging(__name__)
-    test_app = Client(
-        name="dummy",
-        api_id=Config.tg_id,
-        api_hash=Config.tg_hash,
-        session_string=Config.test_session,
-        in_memory=True
-    )
-    async with test_app as app:
+    async with app:
         await ping_reset(logger, app)
         await asyncio.sleep(1)
         await ping_plus(logger, app)

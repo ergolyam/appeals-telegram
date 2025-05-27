@@ -1,11 +1,20 @@
 import logging as logging_base
+from pyrogram.client import Client
 from appeals.config import logging_config
+from appeals.config.config import Config
 
 from appeals.tests.test_ping import test_ping
 
 
 async def run():
     logging = logging_config.setup_logging(__name__)
+    test_app = Client(
+        name="dummy",
+        api_id=Config.tg_id,
+        api_hash=Config.tg_hash,
+        session_string=Config.test_session,
+        in_memory=True
+    )
 
     error_count = 0
     warning_count = 0
@@ -27,7 +36,7 @@ async def run():
 
     try:
         logging.info(f'Start tests...')
-        await test_ping()
+        await test_ping(test_app)
     finally:
         logging.info(f'All tests completed! [Errors: {error_count}, Warnings: {warning_count}, Passed: {passed_count}]')
 

@@ -29,3 +29,6 @@ async def main():
 if __name__ == '__main__':
     if Config.tg_token != 'None':
         asyncio.run(main())
+    elif Config.test_session != 'None':
+        from appeals.tests.run import run
+        asyncio.run(run())

@@ -1,14 +1,29 @@
-from appeals.core.common import Common
-from appeals.api.conversion import post_conversion
+from pyrogram.types import (
+    InlineKeyboardMarkup,
+    InlineKeyboardButton
+)
+from appeals.core.common import (
+    Common,
+    Buttons,
+    ConversionStatus
+)
+from appeals.api.conversion import (
+    post_conversion,
+    get_conversions,
+    get_conversion
+)
 from appeals.config import logging_config
 logging = logging_config.setup_logging(__name__)
 
 
 async def create_conversion(_, callback_query):
     user = callback_query.from_user
+    buttons = []
+    buttons.append([Buttons.back_to_menu])
     Common.waiting_for_input[user.id] = {"step": "head"}
     await callback_query.message.reply(
-        "Введите <b>заголовок</b> (до 32 символов):"
+        text="Введите <b>заголовок</b> (до 32 символов):",
+        reply_markup=InlineKeyboardMarkup(buttons)
     )
     await callback_query.answer()
 
@@ -23,6 +38,8 @@ async def create_conversion_text(_, message):
 
     if state["step"] == "head":
         head = message.text.strip()
+        buttons = []
+        buttons.append([Buttons.back_to_menu])
 
         if len(head) > 32:
             await message.reply(
@@ -33,7 +50,10 @@ async def create_conversion_text(_, message):
             return
 
         state.update({"step": "text", "head": head})
-        await message.reply("Теперь введите <b>основное сообщение</b>:")
+        await message.reply(
+            text="Теперь введите <b>основное сообщение</b>:",
+            reply_markup=InlineKeyboardMarkup(buttons)
+        )
         return
 
     if state["step"] == "text":
@@ -51,6 +71,45 @@ async def create_conversion_text(_, message):
         Common.waiting_for_input.pop(user.id, None)
         return
 
+
+async def conversions_list(_, callback_query):
+    user = callback_query.from_user
+    r = await get_conversions(user.id)
+
+    buttons = []
+    for item in r:
+        status = ConversionStatus[item["status"]]
+        text = f"{status.emoji} {item['head']}"
+        buttons.append(
+            [InlineKeyboardButton(
+                text=text,
+                callback_data=f"conv:{item['id']}"
+            )]
+        )
+    buttons.append([Buttons.back_to_menu])
+    
+    await callback_query.message.edit_text(
+        text="Ваши обращения:",
+        reply_markup=InlineKeyboardMarkup(buttons)
+    )
+    await callback_query.answer()
+
+
+async def conversions_view(_, callback_query):
+    user = callback_query.from_user
+    conv_id = int(callback_query.data.split(":")[1])
+    buttons = []
+    buttons.append([Buttons.back_to_menu])
+    r = await get_conversion(
+        user_id=user.id,
+        conv_id=conv_id
+    )
+    logging.debug(f"{user.id} - response: {r}")
+    text = r[0].get("text")
+    await callback_query.message.edit_text(
+        text=text,
+        reply_markup=InlineKeyboardMarkup(buttons)
+    )
 
 
 if __name__ == "__main__":

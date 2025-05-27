@@ -27,5 +27,38 @@ async def post_conversion(
         return {"status": response.status_code, "data": data}
 
 
+async def get_conversions(
+    user_id: int,
+) -> list:
+    url = f"{Config.api_address}/users/{user_id}/conversions"
+    headers={"accept": "application/json"}
+    response = await Common.http.get(
+        url,
+        headers=headers
+    )
+    data = response.json()
+    if response.status_code == 200:
+        return data
+    else:
+        return [{"status": response.status_code, "data": data}]
+
+
+async def get_conversion(
+    user_id: int,
+    conv_id: int
+) -> list:
+    url = f"{Config.api_address}/users/{user_id}/conversions/{conv_id}"
+    headers={"accept": "application/json"}
+    response = await Common.http.get(
+        url,
+        headers=headers
+    )
+    data = response.json()
+    if response.status_code == 200:
+        return data
+    else:
+        return [{"status": response.status_code, "data": data}]
+
+
 if __name__ == "__main__":
     raise RuntimeError("This module should be run only via main.py")

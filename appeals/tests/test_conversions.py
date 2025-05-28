@@ -2,8 +2,8 @@ import asyncio
 from io import BytesIO
 from appeals.config.config import Config
 from appeals.config import logging_config
-from appeals.core.common import safe_call
-from appeals.tests.common import (
+from appeals.core.common import (
+    safe_call,
     DummyCallbackQuery,
     get_callback_data
 )

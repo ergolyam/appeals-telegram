@@ -84,5 +84,21 @@ async def get_conversion(
         return [{"status": response.status_code, "data": data}]
 
 
+async def get_file_conversion(
+    user_id: int,
+    conv_id: int,
+    file_id: int
+) -> BytesIO:
+    url = f"{Config.api_address}/users/{user_id}/conversions/{conv_id}/files/{file_id}"
+    async with Common.http.stream("GET", url) as r:
+        r.raise_for_status()
+        buffer = BytesIO()
+        async for chunk in r.aiter_bytes():
+            buffer.write(chunk)
+
+    buffer.seek(0)
+    return buffer
+
+
 if __name__ == "__main__":
     raise RuntimeError("This module should be run only via main.py")

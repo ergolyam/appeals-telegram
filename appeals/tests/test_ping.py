@@ -1,13 +1,14 @@
 import asyncio
 from appeals.config.config import Config
 from appeals.config import logging_config
-
+from appeals.core.common import safe_call
 from appeals.funcs.ping import ping_command
 
 
 async def ping_reset(logger, app):
     try:
-        msg = await app.send_message(
+        msg = await safe_call(
+            app.send_message,
             chat_id=Config.test_chat_id,
             text="/ping reset"
         )
@@ -27,7 +28,8 @@ async def ping_reset(logger, app):
 
 async def ping_plus(logger, app):
     try:
-        msg = await app.send_message(
+        msg = await safe_call(
+            app.send_message,
             chat_id=Config.test_chat_id,
             text="/ping plus"
         )
@@ -47,7 +49,8 @@ async def ping_plus(logger, app):
 
 async def ping_minus(logger, app):
     try:
-        msg = await app.send_message(
+        msg = await safe_call(
+            app.send_message,
             chat_id=Config.test_chat_id,
             text="/ping minus"
         )
@@ -67,7 +70,8 @@ async def ping_minus(logger, app):
 
 async def ping_set(logger, app):
     try:
-        msg = await app.send_message(
+        msg = await safe_call(
+            app.send_message,
             chat_id=Config.test_chat_id,
             text="/ping set 42"
         )
@@ -87,7 +91,8 @@ async def ping_set(logger, app):
 
 async def ping_get(logger, app):
     try:
-        msg = await app.send_message(
+        msg = await safe_call(
+            app.send_message,
             chat_id=Config.test_chat_id,
             text="/ping"
         )

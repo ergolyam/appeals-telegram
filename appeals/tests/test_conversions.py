@@ -1,4 +1,5 @@
 import asyncio
+from io import BytesIO
 from appeals.config.config import Config
 from appeals.tests.common import (
     DummyCallbackQuery,
@@ -13,6 +14,7 @@ from appeals.funcs.start import (
 from appeals.funcs.conversion import (
     create_conversion,
     create_conversion_text,
+    skip_files_cb,
     conversions_list,
     conversions_view
 )
@@ -30,7 +32,8 @@ async def create(logger, app):
             chat_id=Config.test_chat_id,
             message_ids=msg.id + 1
         )
-        assert start_out_msg.text == "Здравствуйте! Выберите действие:", f"Expected 'Здравствуйте! Выберите действие:', got {start_out_msg.text!r}"
+        start_out_text = "Здравствуйте! Выберите действие:"
+        assert start_out_msg.text == start_out_text, f"Expected '{start_out_text}', got {start_out_msg.text!r}"
 
         cb_text = "📄 Написать обращение 📄"
         cb_data = get_callback_data(start_out_msg, cb_text)
@@ -43,7 +46,8 @@ async def create(logger, app):
             chat_id=Config.test_chat_id,
             message_ids=msg.id + 2
         )
-        assert head_out_msg.text == "Введите заголовок (до 32 символов):", f"Expected 'Введите заголовок (до 32 символов):', got {head_out_msg.text!r}"
+        head_out_text = "Введите заголовок (до 32 символов):"
+        assert head_out_msg.text == head_out_text, f"Expected '{head_out_text}', got {head_out_msg.text!r}"
 
         head_msg = await app.send_message(
             chat_id=Config.test_chat_id,
@@ -55,7 +59,8 @@ async def create(logger, app):
             chat_id=Config.test_chat_id,
             message_ids=head_msg.id + 1
         )
-        assert text_out_msg.text == "Теперь введите основное сообщение:", f"Expected 'Теперь введите основное сообщение:', got {head_out_msg.text!r}"
+        text_out_text = "Теперь введите основное сообщение:"
+        assert text_out_msg.text == text_out_text, f"Expected '{text_out_text}', got {head_out_msg.text!r}"
 
         text_msg = await app.send_message(
             chat_id=Config.test_chat_id,
@@ -63,15 +68,34 @@ async def create(logger, app):
         )
         await create_conversion_text(app, text_msg)
 
-        finnaly_out_msg = await app.get_messages(
+        file_out_msg = await app.get_messages(
             chat_id=Config.test_chat_id,
             message_ids=text_msg.id + 1
         )
-        assert finnaly_out_msg.text == "✅ Сообщение обработано!", f"Expected '✅ Сообщение обработано!', got {finnaly_out_msg.text!r}"
+        file_out_text = "Пришлите файл для прикрепления или нажмите «Пропустить»."
+        assert file_out_msg.text == file_out_text, f"Expected '{file_out_text}', got {file_out_msg.text!r}"
+
+        file_buffer = BytesIO()
+        file_buffer.write(b"Test File")
+        file_buffer.seek(0)
+        file_buffer.name = "file.txt"
+
+        file_msg = await app.send_document(
+            chat_id=Config.test_chat_id,
+            document=file_buffer
+        )
+        await create_conversion_text(app, file_msg)
+
+        finnaly_out_msg = await app.get_messages(
+            chat_id=Config.test_chat_id,
+            message_ids=file_msg.id + 1
+        )
+        finnaly_out_text = "✅ Сообщение обработано!"
+        assert finnaly_out_msg.text == finnaly_out_text, f"Expected '{finnaly_out_text}', got {finnaly_out_msg.text!r}"
 
         logger.info("Test passed! #1 (create conversion)")
     except AssertionError as e:
-        logger.info(f"Test failed! #1 (create conversion): {e}")
+        logger.error(f"Test failed! #1 (create conversion): {e}")
         raise
 
 
@@ -116,7 +140,7 @@ async def view(logger, app):
 
         logger.info("Test passed! #2 (view conversion)")
     except AssertionError as e:
-        logger.info(f"Test failed! #2 (view conversion): {e}")
+        logger.error(f"Test failed! #2 (view conversion): {e}")
         raise
 
 
@@ -130,6 +154,7 @@ async def ui_create(logger, app):
         )
         await start_msg(app, msg)
 
+
         start_out_msg = await app.get_messages(
             chat_id=Config.test_chat_id,
             message_ids=msg.id + 1
@@ -138,6 +163,7 @@ async def ui_create(logger, app):
         assert cb_data is not None, f"Inline-button {cb_text!r} not found"
         fake_query = DummyCallbackQuery(msg=start_out_msg, data=cb_data)
         await create_conversion(app, fake_query)
+
 
         head_out_msg = await app.get_messages(
             chat_id=Config.test_chat_id,
@@ -148,6 +174,7 @@ async def ui_create(logger, app):
         back_fake_query = DummyCallbackQuery(msg=head_out_msg, data=back_cb_data)
         await start_cb(app, back_fake_query)
 
+
         start1_out_msg = await app.get_messages(
             chat_id=Config.test_chat_id,
             message_ids=msg.id + 1
@@ -157,11 +184,13 @@ async def ui_create(logger, app):
         start1_fake_query = DummyCallbackQuery(msg=start1_out_msg, data=start1_cb_data)
         await create_conversion(app, start1_fake_query)
 
+
         head_msg = await app.send_message(
             chat_id=Config.test_chat_id,
             text="Head ui Test!"
         )
         await create_conversion_text(app, head_msg)
+
 
         text_out_msg = await app.get_messages(
             chat_id=Config.test_chat_id,
@@ -172,9 +201,45 @@ async def ui_create(logger, app):
         back1_fake_query = DummyCallbackQuery(msg=text_out_msg, data=back1_cb_data)
         await start_cb(app, back1_fake_query)
 
+
+        start2_out_msg = await app.get_messages(
+            chat_id=Config.test_chat_id,
+            message_ids=msg.id + 1
+        )
+        start2_cb_data = get_callback_data(start2_out_msg, cb_text)
+        assert start2_cb_data is not None, f"Inline-button {cb_text!r} not found"
+        start2_fake_query = DummyCallbackQuery(msg=start2_out_msg, data=start2_cb_data)
+        await create_conversion(app, start2_fake_query)
+
+
+        head1_msg = await app.send_message(
+            chat_id=Config.test_chat_id,
+            text="Head ui Test!"
+        )
+        await create_conversion_text(app, head1_msg)
+
+
+        text_msg = await app.send_message(
+            chat_id=Config.test_chat_id,
+            text="Text ui Test!"
+        )
+        await create_conversion_text(app, text_msg)
+
+
+        text_out_msg = await app.get_messages(
+            chat_id=Config.test_chat_id,
+            message_ids=text_msg.id + 1
+        )
+        skip_cb_text = "🚫 Пропустить 🚫"
+        skip_cb_data = get_callback_data(text_out_msg, skip_cb_text)
+        assert skip_cb_data is not None, f"Inline-button {skip_cb_text!r} not found"
+        skip_fake_query = DummyCallbackQuery(msg=text_out_msg, data=skip_cb_data)
+        await skip_files_cb(app, skip_fake_query)
+
+
         logger.info("Test passed! #3 (ui create)")
     except AssertionError as e:
-        logger.info(f"Test failed! #3 (ui create): {e}")
+        logger.error(f"Test failed! #3 (ui create): {e}")
         raise
 
 
@@ -188,6 +253,7 @@ async def ui_view(logger, app):
         )
         await start_msg(app, msg)
 
+
         start_out_msg = await app.get_messages(
             chat_id=Config.test_chat_id,
             message_ids=msg.id + 1
@@ -196,6 +262,7 @@ async def ui_view(logger, app):
         assert cb_data is not None, f"Inline-button {cb_text!r} not found"
         fake_query = DummyCallbackQuery(msg=start_out_msg, data=cb_data)
         await conversions_list(app, fake_query)
+
 
         list_out_msg = await app.get_messages(
             chat_id=Config.test_chat_id,
@@ -206,6 +273,7 @@ async def ui_view(logger, app):
         back_fake_query = DummyCallbackQuery(msg=list_out_msg, data=back_cb_data)
         await start_cb(app, back_fake_query)
 
+
         start1_out_msg = await app.get_messages(
             chat_id=Config.test_chat_id,
             message_ids=list_out_msg.id
@@ -214,6 +282,7 @@ async def ui_view(logger, app):
         assert start1_cb_data is not None, f"Inline-button {cb_text!r} not found"
         start1_fake_query = DummyCallbackQuery(msg=start1_out_msg, data=start1_cb_data)
         await conversions_list(app, start1_fake_query)
+
 
         list1_out_msg = await app.get_messages(
             chat_id=Config.test_chat_id,
@@ -225,6 +294,7 @@ async def ui_view(logger, app):
         list_fake_query = DummyCallbackQuery(msg=list1_out_msg, data=list_cb_data)
         await conversions_view(app, list_fake_query)
 
+
         view_out_msg = await app.get_messages(
             chat_id=Config.test_chat_id,
             message_ids=list1_out_msg.id
@@ -234,9 +304,10 @@ async def ui_view(logger, app):
         back1_fake_query = DummyCallbackQuery(msg=view_out_msg, data=back1_cb_data)
         await start_cb(app, back1_fake_query)
 
+
         logger.info("Test passed! #4 (ui view)")
     except AssertionError as e:
-        logger.info(f"Test failed! #4 (ui view): {e}")
+        logger.error(f"Test failed! #4 (ui view): {e}")
         raise
 
 

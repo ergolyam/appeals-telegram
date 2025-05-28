@@ -21,7 +21,7 @@ async def ping_reset(logger, app):
 
         logger.info("Test passed! #1 (ping reset)")
     except AssertionError as e:
-        logger.info(f"Test failed! #1 (ping reset): {e}")
+        logger.error(f"Test failed! #1 (ping reset): {e}")
         raise
 
 
@@ -41,7 +41,7 @@ async def ping_plus(logger, app):
 
         logger.info("Test passed! #2 (ping plus)")
     except AssertionError as e:
-        logger.info(f"Test failed! #2 (ping plus): {e}")
+        logger.error(f"Test failed! #2 (ping plus): {e}")
         raise
 
 
@@ -61,7 +61,7 @@ async def ping_minus(logger, app):
 
         logger.info("Test passed! #3 (ping minus)")
     except AssertionError as e:
-        logger.info(f"Test failed! #3 (ping minus): {e}")
+        logger.error(f"Test failed! #3 (ping minus): {e}")
         raise
 
 
@@ -81,7 +81,7 @@ async def ping_set(logger, app):
 
         logger.info("Test passed! #4 (ping set)")
     except AssertionError as e:
-        logger.info(f"Test failed! #4 (ping set): {e}")
+        logger.error(f"Test failed! #4 (ping set): {e}")
         raise
 
 
@@ -101,7 +101,7 @@ async def ping_get(logger, app):
 
         logger.info("Test passed! #5 (ping get)")
     except AssertionError as e:
-        logger.info(f"Test failed! #5 (ping get): {e}")
+        logger.error(f"Test failed! #5 (ping get): {e}")
         raise
 
 

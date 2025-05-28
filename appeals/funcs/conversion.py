@@ -1,3 +1,4 @@
+from io import BytesIO
 from pyrogram.types import (
     InlineKeyboardMarkup,
     InlineKeyboardButton
@@ -10,6 +11,7 @@ from appeals.core.common import (
 )
 from appeals.api.conversion import (
     post_conversion,
+    pin_files_conversion,
     get_conversions,
     get_conversion
 )
@@ -33,6 +35,8 @@ async def create_conversion(_, callback_query):
 async def create_conversion_text(_, message):
     user = message.from_user
     state = Common.waiting_for_input.get(user.id)
+    buttons = []
+    buttons.append([Buttons.back_to_menu])
 
     if not state:
         await safe_call(
@@ -43,8 +47,6 @@ async def create_conversion_text(_, message):
 
     if state["step"] == "head":
         head = message.text.strip()
-        buttons = []
-        buttons.append([Buttons.back_to_menu])
 
         if len(head) > 32:
             await safe_call(
@@ -61,7 +63,7 @@ async def create_conversion_text(_, message):
         )
         return
 
-    if state["step"] == "text":
+    elif state["step"] == "text":
         head = state["head"]
         text = message.text
 
@@ -71,6 +73,46 @@ async def create_conversion_text(_, message):
             text=text
         )
         logging.debug(f"{user.id} - response: {r}")
+        state.update({"step": "file", "conv_id": r[0].get('id')})
+        buttons.append([Buttons.skip_files])
+
+        await safe_call(
+            message.reply,
+            text="Пришлите файл для прикрепления или нажмите «Пропустить».",
+            reply_markup=InlineKeyboardMarkup(buttons),
+        )
+
+    elif state["step"] == "file":
+        media = message.document or message.photo or message.video
+        if not media:
+            await safe_call(
+                message.reply,
+                text="❗️ Пришлите файл или нажмите «Пропустить»."
+            )
+            return
+
+        if message.document:
+            filename = media.file_name or "file"
+            mime = media.mime_type or "application/octet-stream"
+        elif message.photo:
+            filename = "photo.jpg"
+            mime = "image/jpeg"
+        else:
+            filename = "video.mp4"
+            mime = "video/mp4"
+
+        file_obj = await message.download(in_memory=True)
+
+        if not isinstance(file_obj, BytesIO):
+            file_obj = BytesIO(open(file_obj, "rb").read())
+
+        await pin_files_conversion(
+            user.id,
+            state["conv_id"],
+            filename,
+            mime,
+            file_obj
+        )
 
         await safe_call(
             message.reply,
@@ -78,6 +120,20 @@ async def create_conversion_text(_, message):
         )
         Common.waiting_for_input.pop(user.id, None)
         return
+
+
+async def skip_files_cb(_, callback_query):
+    user = callback_query.from_user
+    state = Common.waiting_for_input.pop(user.id, None)
+
+    if not state or state.get("step") != "file":
+        await callback_query.answer()
+        return
+
+    await safe_call(
+        callback_query.message.edit_text,
+        text="✅ Сообщение обработано!"
+    )
 
 
 async def conversions_list(_, callback_query):

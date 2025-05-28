@@ -8,6 +8,7 @@ from appeals.funcs.start import (
 from appeals.funcs.conversion import (
     create_conversion,
     create_conversion_text,
+    skip_files_cb,
     conversions_list,
     conversions_view
 )
@@ -53,9 +54,18 @@ def init_handlers(app):
         )
     )
     app.add_handler(
+        pyrogram.handlers.callback_query_handler.CallbackQueryHandler(
+            skip_files_cb,
+            pyrogram.filters.regex(r"^skip_files$")
+        )
+    )
+    app.add_handler(
         pyrogram.handlers.message_handler.MessageHandler(
             create_conversion_text,
-            pyrogram.filters.text &
+            (
+                pyrogram.filters.text |
+                pyrogram.filters.media
+            ) &
                 pyrogram.filters.private
         )
     )

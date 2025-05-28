@@ -23,6 +23,10 @@ class Buttons():
         text="⬅️ На главную",
         callback_data="back_to_menu"
     )
+    skip_files = InlineKeyboardButton(
+        text="🚫 Пропустить 🚫",
+        callback_data="skip_files"
+    )
 
 
 class ConversionStatus(Enum):

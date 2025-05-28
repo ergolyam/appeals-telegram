@@ -1,3 +1,4 @@
+from io import BytesIO
 from appeals.core.common import Common
 from appeals.config.config import Config
 
@@ -6,7 +7,7 @@ async def post_conversion(
     user_id: int,
     head: str,
     text: str
-):
+) -> list:
     url = f"{Config.api_address}/conversions"
     headers={"accept": "application/json"}
     params = {
@@ -24,7 +25,30 @@ async def post_conversion(
     if response.status_code == 200:
         return data
     else:
-        return {"status": response.status_code, "data": data}
+        return [{"status": response.status_code, "data": data}]
+
+
+async def pin_files_conversion(
+    user_id: int,
+    conv_id: str,
+    filename: str,
+    mime: str,
+    raw_file: BytesIO
+) -> list:
+    url = f"{Config.api_address}/users/{user_id}/conversions/{conv_id}/files"
+    headers={"accept": "application/json"}
+    raw_file.seek(0)
+    files = {"files": (filename, raw_file, mime)}
+    response = await Common.http.post(
+        url,
+        headers=headers,
+        files=files
+    )
+    data = response.json()
+    if response.status_code == 200:
+        return data
+    else:
+        return [{"status": response.status_code, "data": data}]
 
 
 async def get_conversions(

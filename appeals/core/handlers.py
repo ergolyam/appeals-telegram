@@ -10,7 +10,8 @@ from appeals.funcs.conversion import (
     create_conversion_text,
     skip_files_cb,
     conversions_list,
-    conversions_view
+    conversions_view,
+    conversions_file_view
 )
 
 
@@ -51,6 +52,12 @@ def init_handlers(app):
         pyrogram.handlers.callback_query_handler.CallbackQueryHandler(
             conversions_view,
             pyrogram.filters.regex(r"^conv:(\d+)$")
+        )
+    )
+    app.add_handler(
+        pyrogram.handlers.callback_query_handler.CallbackQueryHandler(
+            conversions_file_view,
+            pyrogram.filters.regex(r"^view_file:(\d+):(\d+)$")
         )
     )
     app.add_handler(

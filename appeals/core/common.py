@@ -8,6 +8,7 @@ from pyrogram.errors import FloodWait
 class Common():
     http = httpx.AsyncClient(timeout=30)
     waiting_for_input = {}
+    file_input = {}
 
 
 class Buttons():

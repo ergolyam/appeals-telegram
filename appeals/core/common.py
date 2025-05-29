@@ -9,6 +9,7 @@ class Common():
     http = httpx.AsyncClient(timeout=30)
     waiting_for_input = {}
     file_input = {}
+    user_admins = {}
 
 
 class Buttons():
@@ -23,6 +24,10 @@ class Buttons():
     back_to_menu = InlineKeyboardButton(
         text="⬅️ На главную",
         callback_data="back_to_menu"
+    )
+    back_to_list = InlineKeyboardButton(
+        text="⬅️ На главную",
+        callback_data="back_to_list"
     )
     skip_files = InlineKeyboardButton(
         text="🚫 Пропустить 🚫",

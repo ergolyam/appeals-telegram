@@ -15,7 +15,9 @@ from appeals.funcs.conversion import (
 )
 from appeals.funcs.conversion_admin import (
     conversions_all_list_msg,
-    conversions_all_list_cb
+    conversions_all_list_cb,
+    status_conversion_menu,
+    status_conversion_set
 )
 
 def init_handlers(app):
@@ -62,6 +64,18 @@ def init_handlers(app):
         pyrogram.handlers.callback_query_handler.CallbackQueryHandler(
             conversions_list,
             pyrogram.filters.regex("^conversions_list$")
+        )
+    )
+    app.add_handler(
+        pyrogram.handlers.callback_query_handler.CallbackQueryHandler(
+            status_conversion_menu,
+            pyrogram.filters.regex(r"^status_menu:(\d+):(\d+)$")
+        )
+    )
+    app.add_handler(
+        pyrogram.handlers.callback_query_handler.CallbackQueryHandler(
+            status_conversion_set,
+            pyrogram.filters.regex(r"^status_set:(\w+):(\d+):(\d+)$")
         )
     )
     app.add_handler(

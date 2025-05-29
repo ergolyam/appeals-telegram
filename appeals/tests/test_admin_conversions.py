@@ -134,7 +134,7 @@ async def ui_view(logger, app):
             chat_id=Config.test_chat_id,
             message_ids=msg.id + 1
         )
-        list_cb_text = "🆕 Head Test!"
+        list_cb_text = "🆕 Head ui Test!"
         list_cb_data = get_callback_data(list_out_msg, list_cb_text)
         assert list_cb_data is not None, f"Inline-button {list_cb_text!r} not found"
         back_fake_query = DummyCallbackQuery(msg=list_out_msg, data=list_cb_data)

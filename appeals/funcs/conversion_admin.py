@@ -1,10 +1,14 @@
-from appeals.api.conversion_admin import get_all_conversions
+from appeals.api.conversion_admin import (
+    get_all_conversions,
+    set_status_conversion
+)
 from pyrogram.types import (
     InlineKeyboardMarkup,
     InlineKeyboardButton
 )
 from appeals.core.common import (
     Common,
+    Buttons,
     ConversionStatus,
     safe_call
 )
@@ -73,6 +77,54 @@ async def conversions_all_list_msg(_, message):
 
 async def conversions_all_list_cb(_, callback_query):
     await conversions_all_list(callback_query)
+
+
+async def status_conversion_menu(_, callback_query):
+    data = callback_query.data.split(":")
+    user_id = int(data[1])
+    conv_id = int(data[2])
+    buttons = []
+    for status in ConversionStatus:
+        button = InlineKeyboardButton(
+            text=f"{status.emoji} {status.code}",
+            callback_data=f"status_set:{status.code}:{user_id}:{conv_id}",
+        )
+        buttons.append([button])
+    buttons.append([Buttons.back_to_list])
+    await safe_call(
+        callback_query.message.edit_text,
+        text="Выберите статус:",
+        reply_markup=InlineKeyboardMarkup(buttons)
+    )
+
+
+async def status_conversion_set(_, callback_query):
+    user = callback_query.from_user
+    data = callback_query.data.split(":")
+    status = str(data[1])
+    user_id = int(data[2])
+    conv_id = int(data[3])
+    passwd = Common.user_admins.get(user.id)
+    if passwd:
+        r = await set_status_conversion(user_id, conv_id, status, passwd)
+        if r and isinstance(r[0], dict) and "status_code" in r[0]:
+            status = r[0]["status_code"]
+
+            if status == 401:
+                await safe_call(
+                    callback_query.message.edit_text,
+                    text="❌ Ошибка авторизации: неверный пароль"
+                )
+            else:
+                await safe_call(
+                    callback_query.message.edit_text,
+                    text=f"⚠️ Сервер вернул ошибку {status}"
+                )
+            return
+        await safe_call(
+            callback_query.message.edit_text,
+            text=f"✅ Установлен статус {status}"
+        )
 
 
 if __name__ == "__main__":

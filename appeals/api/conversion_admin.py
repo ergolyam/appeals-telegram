@@ -19,5 +19,29 @@ async def get_all_conversions(
         return [{"status_code": response.status_code, "data": data}]
 
 
+async def set_status_conversion(
+    user_id: int,
+    conv_id: int,
+    status: str,
+    passwd: str
+) -> list:
+    url = f"{Config.api_address}/users/{user_id}/conversions/{conv_id}/status"
+    headers={"accept": "application/json"}
+    params = {
+        "status": status,
+    }
+    response = await Common.http.patch(
+        url,
+        headers=headers,
+        json=params,
+        auth=( 'admin', passwd )
+    )
+    data = response.json()
+    if response.status_code == 200:
+        return data
+    else:
+        return [{"status_code": response.status_code, "data": data}]
+
+
 if __name__ == "__main__":
     raise RuntimeError("This module should be run only via main.py")

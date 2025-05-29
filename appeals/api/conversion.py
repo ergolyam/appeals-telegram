@@ -25,7 +25,7 @@ async def post_conversion(
     if response.status_code == 200:
         return data
     else:
-        return [{"status": response.status_code, "data": data}]
+        return [{"status_code": response.status_code, "data": data}]
 
 
 async def pin_files_conversion(
@@ -48,7 +48,7 @@ async def pin_files_conversion(
     if response.status_code == 200:
         return data
     else:
-        return [{"status": response.status_code, "data": data}]
+        return [{"status_code": response.status_code, "data": data}]
 
 
 async def get_conversions(
@@ -64,7 +64,7 @@ async def get_conversions(
     if response.status_code == 200:
         return data
     else:
-        return [{"status": response.status_code, "data": data}]
+        return [{"status_code": response.status_code, "data": data}]
 
 
 async def get_conversion(
@@ -81,7 +81,7 @@ async def get_conversion(
     if response.status_code == 200:
         return data
     else:
-        return [{"status": response.status_code, "data": data}]
+        return [{"status_code": response.status_code, "data": data}]
 
 
 async def get_file_conversion(

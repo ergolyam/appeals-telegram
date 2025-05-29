@@ -9,7 +9,7 @@ async def get_ping() -> dict:
     if response.status_code == 200:
         return data
     else:
-        return {"status": response.status_code}
+        return {"status_code": response.status_code}
 
 
 async def post_ping(
@@ -31,7 +31,7 @@ async def post_ping(
     if response.status_code == 200:
         return data
     else:
-        return {"status": response.status_code, "data": data}
+        return {"status_code": response.status_code, "data": data}
 
 
 if __name__ == "__main__":

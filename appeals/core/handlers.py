@@ -13,7 +13,10 @@ from appeals.funcs.conversion import (
     conversions_view,
     conversions_file_view
 )
-
+from appeals.funcs.conversion_admin import (
+    conversions_all_list_msg,
+    conversions_all_list_cb
+)
 
 def init_handlers(app):
     app.add_handler(
@@ -31,9 +34,22 @@ def init_handlers(app):
         )
     )
     app.add_handler(
+        pyrogram.handlers.message_handler.MessageHandler(
+            conversions_all_list_msg,
+            pyrogram.filters.command("admin") &
+                pyrogram.filters.private
+        )
+    )
+    app.add_handler(
         pyrogram.handlers.callback_query_handler.CallbackQueryHandler(
             start_cb,
             pyrogram.filters.regex("^back_to_menu$")
+        )
+    )
+    app.add_handler(
+        pyrogram.handlers.callback_query_handler.CallbackQueryHandler(
+            conversions_all_list_cb,
+            pyrogram.filters.regex("^back_to_list$")
         )
     )
     app.add_handler(
@@ -51,13 +67,13 @@ def init_handlers(app):
     app.add_handler(
         pyrogram.handlers.callback_query_handler.CallbackQueryHandler(
             conversions_view,
-            pyrogram.filters.regex(r"^conv:(\d+)$")
+            pyrogram.filters.regex(r"^conv:(\w+):(\d+):(\d+)$")
         )
     )
     app.add_handler(
         pyrogram.handlers.callback_query_handler.CallbackQueryHandler(
             conversions_file_view,
-            pyrogram.filters.regex(r"^view_file:(\d+):(\d+)$")
+            pyrogram.filters.regex(r"^view_file:(\d+):(\d+):(\d+)$")
         )
     )
     app.add_handler(

@@ -193,6 +193,11 @@ async def conversions_view(_, callback_query):
     back_button = Buttons.back_to_menu
     if role == 'admin':
         back_button = Buttons.back_to_list
+        set_status = InlineKeyboardButton(
+            text="⚙️ Установить статус ⚙️",
+            callback_data=f"status_menu:{user_id}:{conv_id}"
+        )
+        buttons.append([set_status])
     r = await get_conversion(
         user_id=user_id,
         conv_id=conv_id

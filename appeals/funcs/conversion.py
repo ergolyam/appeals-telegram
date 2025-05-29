@@ -73,6 +73,15 @@ async def create_conversion_text(_, message):
             head=head,
             text=text
         )
+        if r and isinstance(r[0], dict) and "status_code" in r[0]:
+            status = r[0]["status_code"]
+            await safe_call(
+                message.reply_text,
+                text=f"⚠️ Сервер вернул ошибку {status}"
+            )
+            Common.waiting_for_input.pop(user.id, None)
+            return
+
         logging.debug(f"{user.id} - response: {r}")
         state.update({"step": "file", "conv_id": r[0].get('id')})
         buttons.append([Buttons.skip_files])
@@ -107,13 +116,21 @@ async def create_conversion_text(_, message):
         if not isinstance(file_obj, BytesIO):
             file_obj = BytesIO(open(file_obj, "rb").read())
 
-        await pin_files_conversion(
+        r = await pin_files_conversion(
             user.id,
             state["conv_id"],
             filename,
             mime,
             file_obj
         )
+        if r and isinstance(r[0], dict) and "status_code" in r[0]:
+            status = r[0]["status_code"]
+            await safe_call(
+                message.reply_text,
+                text=f"⚠️ Сервер вернул ошибку {status}"
+            )
+            Common.waiting_for_input.pop(user.id, None)
+            return
 
         await safe_call(
             message.reply,
@@ -140,6 +157,13 @@ async def skip_files_cb(_, callback_query):
 async def conversions_list(_, callback_query):
     user = callback_query.from_user
     r = await get_conversions(user.id)
+    if r and isinstance(r[0], dict) and "status_code" in r[0]:
+        status = r[0]["status_code"]
+        await safe_call(
+            callback_query.message.reply_text,
+            text=f"⚠️ Сервер вернул ошибку {status}"
+        )
+        return
 
     buttons = []
     for item in r:
@@ -148,7 +172,7 @@ async def conversions_list(_, callback_query):
         buttons.append(
             [InlineKeyboardButton(
                 text=text,
-                callback_data=f"conv:{item['id']}"
+                callback_data=f"conv:user:{user.id}:{item['id']}"
             )]
         )
     buttons.append([Buttons.back_to_menu])
@@ -161,27 +185,40 @@ async def conversions_list(_, callback_query):
 
 
 async def conversions_view(_, callback_query):
-    user = callback_query.from_user
-    conv_id = int(callback_query.data.split(":")[1])
+    data = callback_query.data.split(":")
+    role = str(data[1])
+    user_id = int(data[2])
+    conv_id = int(data[3])
     buttons = []
-    buttons.append([Buttons.back_to_menu])
+    back_button = Buttons.back_to_menu
+    if role == 'admin':
+        back_button = Buttons.back_to_list
     r = await get_conversion(
-        user_id=user.id,
+        user_id=user_id,
         conv_id=conv_id
     )
-    logging.debug(f"{user.id} - response: {r}")
+    if r and isinstance(r[0], dict) and "status_code" in r[0]:
+        status = r[0]["status_code"]
+        await safe_call(
+            callback_query.message.reply_text,
+            text=f"⚠️ Сервер вернул ошибку {status}"
+        )
+        return
+
+    logging.debug(f"{user_id} - response: {r}")
     text = r[0].get("text")
     files = r[0].get("files")
     if files:
         file_id = files[0].get('id')
         file_name = files[0].get('filename')
         file_type = files[0].get('content_type')
-        Common.file_input[user.id] = {"type": file_type, "name": file_name}
+        Common.file_input[user_id] = {"type": file_type, "name": file_name}
         view_files = InlineKeyboardButton(
             text="📁 Вложения 📁",
-            callback_data=f"view_file:{conv_id}:{file_id}"
+            callback_data=f"view_file:{user_id}:{conv_id}:{file_id}"
         )
         buttons.append([view_files])
+    buttons.append([back_button])
     await safe_call(
         callback_query.message.edit_text,
         text=text,
@@ -190,14 +227,14 @@ async def conversions_view(_, callback_query):
 
 
 async def conversions_file_view(_, callback_query):
-    user = callback_query.from_user
     data = callback_query.data.split(":")
-    conv_id = int(data[1])
-    file_id = int(data[1])
-    state = Common.file_input.get(user.id)
+    user_id = int(data[1])
+    conv_id = int(data[2])
+    file_id = int(data[3])
+    state = Common.file_input.get(user_id)
     if state:
         buffer = await get_file_conversion(
-            user.id,
+            user_id,
             conv_id,
             file_id
         )

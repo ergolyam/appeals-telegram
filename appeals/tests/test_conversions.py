@@ -344,11 +344,8 @@ async def test_conversions(app):
     logger = logging_config.setup_logging(__name__)
     async with app:
         await create(logger, app)
-        await asyncio.sleep(1)
         await view(logger, app)
-        await asyncio.sleep(1)
         await ui_create(logger, app)
-        await asyncio.sleep(1)
         await ui_view(logger, app)
 
 

@@ -198,6 +198,11 @@ async def conversions_view(_, callback_query):
             callback_data=f"status_menu:{user_id}:{conv_id}"
         )
         buttons.append([set_status])
+        remove_conversion = InlineKeyboardButton(
+            text="🗑 Удалить обращение 🗑",
+            callback_data=f"remove_conversion:{user_id}:{conv_id}"
+        )
+        buttons.append([remove_conversion])
     r = await get_conversion(
         user_id=user_id,
         conv_id=conv_id

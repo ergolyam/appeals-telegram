@@ -27,5 +27,16 @@ def get_callback_data(
                 return button.callback_data
 
 
+async def clicker(app, func, chat_id, msg_id, cb_text):
+    msg = await app.get_messages(
+        chat_id=chat_id,
+        message_ids=msg_id
+    )
+    cb_data = get_callback_data(msg, cb_text)
+    assert cb_data is not None, f"Inline-button {cb_text!r} not found"
+    fake_query = DummyCallbackQuery(msg=msg, data=cb_data)
+    await func(app, fake_query)
+
+
 if __name__ == "__main__":
     raise RuntimeError("This module should be run only via main.py")

@@ -1,6 +1,7 @@
 from appeals.api.conversion_admin import (
     get_all_conversions,
-    set_status_conversion
+    set_status_conversion,
+    delete_conversion
 )
 from pyrogram.types import (
     InlineKeyboardMarkup,
@@ -106,7 +107,12 @@ async def status_conversion_set(_, callback_query):
     conv_id = int(data[3])
     passwd = Common.user_admins.get(user.id)
     if passwd:
-        r = await set_status_conversion(user_id, conv_id, status, passwd)
+        r = await set_status_conversion(
+            user_id,
+            conv_id,
+            status,
+            passwd
+        )
         if r and isinstance(r[0], dict) and "status_code" in r[0]:
             status = r[0]["status_code"]
 
@@ -124,6 +130,38 @@ async def status_conversion_set(_, callback_query):
         await safe_call(
             callback_query.message.edit_text,
             text=f"✅ Установлен статус {status}"
+        )
+
+
+async def conversion_remove(_, callback_query):
+    user = callback_query.from_user
+    data = callback_query.data.split(":")
+    user_id = int(data[1])
+    conv_id = int(data[2])
+    passwd = Common.user_admins.get(user.id)
+    if passwd:
+        r = await delete_conversion(
+            user_id,
+            conv_id,
+            passwd
+        )
+        if r[0].get('data') == "unsuccessfully":
+            status = r[0]["status_code"]
+
+            if status == 401:
+                await safe_call(
+                    callback_query.message.edit_text,
+                    text="❌ Ошибка авторизации: неверный пароль"
+                )
+            else:
+                await safe_call(
+                    callback_query.message.edit_text,
+                    text=f"⚠️ Сервер вернул ошибку {status}"
+                )
+            return
+        await safe_call(
+            callback_query.message.edit_text,
+            text=f"🗑 Обращение удалено"
         )
 
 

@@ -43,5 +43,21 @@ async def set_status_conversion(
         return [{"status_code": response.status_code, "data": data}]
 
 
+async def delete_conversion(
+    user_id: int,
+    conv_id: int,
+    passwd: str
+) -> list:
+    url = f"{Config.api_address}/users/{user_id}/conversions/{conv_id}"
+    response = await Common.http.delete(
+        url,
+        auth=( 'admin', passwd )
+    )
+    if response.status_code == 204:
+        return [{"status_code": response.status_code, "data": "successfully"}]
+    else:
+        return [{"status_code": response.status_code, "data": "unsuccessfully"}]
+
+
 if __name__ == "__main__":
     raise RuntimeError("This module should be run only via main.py")

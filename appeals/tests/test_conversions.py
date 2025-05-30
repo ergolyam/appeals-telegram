@@ -1,11 +1,11 @@
-import asyncio
 from io import BytesIO
 from appeals.config.config import Config
 from appeals.config import logging_config
-from appeals.core.common import (
-    safe_call,
+from appeals.core.common import safe_call
+from appeals.tests.common import (
     DummyCallbackQuery,
-    get_callback_data
+    get_callback_data,
+    clicker
 )
 from appeals.funcs.start import (
     start_msg,
@@ -179,35 +179,9 @@ async def ui_create(logger, app):
         )
         await start_msg(app, msg)
 
-
-        start_out_msg = await app.get_messages(
-            chat_id=Config.test_chat_id,
-            message_ids=msg.id + 1
-        )
-        cb_data = get_callback_data(start_out_msg, cb_text)
-        assert cb_data is not None, f"Inline-button {cb_text!r} not found"
-        fake_query = DummyCallbackQuery(msg=start_out_msg, data=cb_data)
-        await create_conversion(app, fake_query)
-
-
-        head_out_msg = await app.get_messages(
-            chat_id=Config.test_chat_id,
-            message_ids=msg.id + 2
-        )
-        back_cb_data = get_callback_data(head_out_msg, back_cb_text)
-        assert back_cb_data is not None, f"Inline-button {back_cb_text!r} not found"
-        back_fake_query = DummyCallbackQuery(msg=head_out_msg, data=back_cb_data)
-        await start_cb(app, back_fake_query)
-
-
-        start1_out_msg = await app.get_messages(
-            chat_id=Config.test_chat_id,
-            message_ids=msg.id + 1
-        )
-        start1_cb_data = get_callback_data(start1_out_msg, cb_text)
-        assert start1_cb_data is not None, f"Inline-button {cb_text!r} not found"
-        start1_fake_query = DummyCallbackQuery(msg=start1_out_msg, data=start1_cb_data)
-        await create_conversion(app, start1_fake_query)
+        await clicker(app, create_conversion, Config.test_chat_id, msg.id + 1, cb_text)
+        await clicker(app, start_cb, Config.test_chat_id, msg.id + 2, back_cb_text)
+        await clicker(app, create_conversion, Config.test_chat_id, msg.id + 2, cb_text)
 
 
         head_msg = await safe_call(
@@ -218,24 +192,8 @@ async def ui_create(logger, app):
         await create_conversion_text(app, head_msg)
 
 
-        text_out_msg = await app.get_messages(
-            chat_id=Config.test_chat_id,
-            message_ids=head_msg.id + 1
-        )
-        back1_cb_data = get_callback_data(text_out_msg, back_cb_text)
-        assert back1_cb_data is not None, f"Inline-button {back_cb_text!r} not found"
-        back1_fake_query = DummyCallbackQuery(msg=text_out_msg, data=back1_cb_data)
-        await start_cb(app, back1_fake_query)
-
-
-        start2_out_msg = await app.get_messages(
-            chat_id=Config.test_chat_id,
-            message_ids=msg.id + 1
-        )
-        start2_cb_data = get_callback_data(start2_out_msg, cb_text)
-        assert start2_cb_data is not None, f"Inline-button {cb_text!r} not found"
-        start2_fake_query = DummyCallbackQuery(msg=start2_out_msg, data=start2_cb_data)
-        await create_conversion(app, start2_fake_query)
+        await clicker(app, start_cb, Config.test_chat_id, head_msg.id + 1, back_cb_text)
+        await clicker(app, create_conversion, Config.test_chat_id, head_msg.id + 1, cb_text)
 
 
         head1_msg = await safe_call(
@@ -283,55 +241,11 @@ async def ui_view(logger, app):
         await start_msg(app, msg)
 
 
-        start_out_msg = await app.get_messages(
-            chat_id=Config.test_chat_id,
-            message_ids=msg.id + 1
-        )
-        cb_data = get_callback_data(start_out_msg, cb_text)
-        assert cb_data is not None, f"Inline-button {cb_text!r} not found"
-        fake_query = DummyCallbackQuery(msg=start_out_msg, data=cb_data)
-        await conversions_list(app, fake_query)
-
-
-        list_out_msg = await app.get_messages(
-            chat_id=Config.test_chat_id,
-            message_ids=start_out_msg.id
-        )
-        back_cb_data = get_callback_data(list_out_msg, back_cb_text)
-        assert back_cb_data is not None, f"Inline-button {back_cb_text!r} not found"
-        back_fake_query = DummyCallbackQuery(msg=list_out_msg, data=back_cb_data)
-        await start_cb(app, back_fake_query)
-
-
-        start1_out_msg = await app.get_messages(
-            chat_id=Config.test_chat_id,
-            message_ids=list_out_msg.id
-        )
-        start1_cb_data = get_callback_data(start1_out_msg, cb_text)
-        assert start1_cb_data is not None, f"Inline-button {cb_text!r} not found"
-        start1_fake_query = DummyCallbackQuery(msg=start1_out_msg, data=start1_cb_data)
-        await conversions_list(app, start1_fake_query)
-
-
-        list1_out_msg = await app.get_messages(
-            chat_id=Config.test_chat_id,
-            message_ids=start1_out_msg.id
-        )
-        list_cb_text = "🆕 Head Test!"
-        list_cb_data = get_callback_data(list1_out_msg, list_cb_text)
-        assert list_cb_data is not None, f"Inline-button {list_cb_text!r} not found"
-        list_fake_query = DummyCallbackQuery(msg=list1_out_msg, data=list_cb_data)
-        await conversions_view(app, list_fake_query)
-
-
-        view_out_msg = await app.get_messages(
-            chat_id=Config.test_chat_id,
-            message_ids=list1_out_msg.id
-        )
-        back1_cb_data = get_callback_data(view_out_msg, back_cb_text)
-        assert back1_cb_data is not None, f"Inline-button {back_cb_text!r} not found"
-        back1_fake_query = DummyCallbackQuery(msg=view_out_msg, data=back1_cb_data)
-        await start_cb(app, back1_fake_query)
+        await clicker(app, conversions_list, Config.test_chat_id, msg.id + 1, cb_text)
+        await clicker(app, start_cb, Config.test_chat_id, msg.id + 1, back_cb_text)
+        await clicker(app, conversions_list, Config.test_chat_id, msg.id + 1, cb_text)
+        await clicker(app, conversions_view, Config.test_chat_id, msg.id + 1, "🆕 Head Test!")
+        await clicker(app, start_cb, Config.test_chat_id, msg.id + 1, back_cb_text)
 
 
         logger.info("Test passed! #4 (ui view)")

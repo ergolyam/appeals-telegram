@@ -1,9 +1,12 @@
 from appeals.config.config import Config
 from appeals.config import logging_config
-from appeals.core.common import (
-    safe_call,
+from appeals.tests.common import (
     DummyCallbackQuery,
     get_callback_data,
+    clicker
+)
+from appeals.core.common import (
+    safe_call,
     ConversionStatus
 )
 from appeals.funcs.conversion_admin import (
@@ -68,6 +71,7 @@ async def view(logger, app):
         logger.error(f"Test failed! #1 (admin view conversion): {e}")
         raise
 
+
 async def assert_status(app, status_emoji):
     msg = await safe_call(
         app.send_message,
@@ -83,6 +87,7 @@ async def assert_status(app, status_emoji):
     cb_data = get_callback_data(list_out_msg, cb_text)
     assert cb_data is not None, f"Inline-button {cb_text!r} not found"
     return list_out_msg, cb_data
+
 
 async def set_status(app, msg, cb_data, status_emoji, status_code):
     fake_query = DummyCallbackQuery(msg=msg, data=cb_data)
@@ -119,7 +124,9 @@ async def status(logger, app):
         logger.error(f"Test failed! #2 (admin status): {e}")
         raise
 
+
 async def ui_view(logger, app):
+    cb_text = "🆕 Head ui Test!"
     back_cb_text = "⬅️ На главную"
     try:
         msg = await safe_call(
@@ -129,27 +136,8 @@ async def ui_view(logger, app):
         )
         await conversions_all_list_msg(app, msg)
 
-
-        list_out_msg = await app.get_messages(
-            chat_id=Config.test_chat_id,
-            message_ids=msg.id + 1
-        )
-        list_cb_text = "🆕 Head ui Test!"
-        list_cb_data = get_callback_data(list_out_msg, list_cb_text)
-        assert list_cb_data is not None, f"Inline-button {list_cb_text!r} not found"
-        back_fake_query = DummyCallbackQuery(msg=list_out_msg, data=list_cb_data)
-        await conversions_view(app, back_fake_query)
-
-
-        view_out_msg = await app.get_messages(
-            chat_id=Config.test_chat_id,
-            message_ids=list_out_msg.id
-        )
-        back_cb_data = get_callback_data(view_out_msg, back_cb_text)
-        assert back_cb_data is not None, f"Inline-button {back_cb_text!r} not found"
-        back_fake_query = DummyCallbackQuery(msg=view_out_msg, data=back_cb_data)
-        await conversions_all_list_cb(app, back_fake_query)
-
+        await clicker(app, conversions_view, Config.test_chat_id, msg.id + 1, cb_text)
+        await clicker(app, conversions_all_list_cb, Config.test_chat_id, msg.id + 1, back_cb_text)
 
         logger.info("Test passed! #3 (admin ui view)")
     except AssertionError as e:

@@ -13,7 +13,8 @@ from appeals.funcs.conversion_admin import (
     conversions_all_list_msg,
     conversions_all_list_cb,
     status_conversion_menu,
-    status_conversion_set
+    status_conversion_set,
+    conversion_remove
 )
 from appeals.funcs.conversion import (
     conversions_view,
@@ -145,12 +146,33 @@ async def ui_view(logger, app):
         raise
 
 
+async def delete(logger, app):
+    cb_texts = ["🆕 Head ui Test!", "🔒 Head Test!"]
+    rm_cb_text = "🗑 Удалить обращение 🗑"
+    try:
+        for cb_text in cb_texts:
+            msg = await safe_call(
+                app.send_message,
+                chat_id=Config.test_chat_id,
+                text="/admin"
+            )
+            await conversions_all_list_msg(app, msg)
+            await clicker(app, conversions_view, Config.test_chat_id, msg.id + 1, cb_text)
+            await clicker(app, conversion_remove, Config.test_chat_id, msg.id + 1, rm_cb_text)
+
+        logger.info("Test passed! #4 (admin delete)")
+    except AssertionError as e:
+        logger.error(f"Test failed! #4 (admin delete): {e}")
+        raise
+
+
 async def test_admin_conversions(app):
     logger = logging_config.setup_logging(__name__)
     async with app:
         await view(logger, app)
         await status(logger, app)
         await ui_view(logger, app)
+        await delete(logger, app)
 
 
 if __name__ == "__main__":

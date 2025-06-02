@@ -9,7 +9,7 @@ An asynchronous Telegram bot for filing and tracking citizen appeals (service re
 3. **Download Dependencies**: Download the required dependencies into the Virtual Environment `venv` using `uv`.
 
 ```shell
-git clone https://github.com/your-org/appeals-telegram.git
+git clone https://github.com/grisha765/appeals-telegram.git
 cd appeals-telegram
 python -m venv .venv
 .venv/bin/python -m pip install uv

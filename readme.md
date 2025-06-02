@@ -1,5 +1,4 @@
 # appeals-telegram
-
 An asynchronous Telegram bot for filing and tracking citizen appeals (service requests) through chat. The bot posts every appeal to a separate FastAPI service – see **[appeals‑backend](https://github.com/grisha765/appeals-backend)** – and lets users follow its life‑cycle without leaving Telegram. Built for learning purposes and needs further refinement, but it can be used now: Pyrogram, coloured console logging, dotenv configuration and self‑contained integration tests.
 
 ### Initial Setup
@@ -21,10 +20,10 @@ python -m venv .venv
 ### Deploy
 
 - Run the bot:
-  ```bash
-  .venv/bin/python appeals
-  ```
-  - Make sure the sibling **appeals-backend** service is running and reachable at the `API_ADDRESS` configured below.
+    ```bash
+    TG_TOKEN="telegram_bot_token" .venv/bin/python appeals
+    ```
+    - Make sure the sibling **appeals-backend** service is running and reachable at the `API_ADDRESS` configured below.
 
 ## Environment Variables
 

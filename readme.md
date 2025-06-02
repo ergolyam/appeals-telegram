@@ -34,7 +34,7 @@ The following environment variables control the startup of the project:
 | `LOG_LEVEL`    | `DEBUG`, `INFO`, `WARNING`, `ERROR` | Logging verbosity                                                       |
 | `TG_ID`        | *integer*                           | Telegram API ID from [https://my.telegram.org](https://my.telegram.org) |
 | `TG_HASH`      | *string*                            | Telegram API hash                                                       |
-| `TG_TOKEN`     | *string*                            | Bot token issued by @BotFather                                          |
+| `TG_TOKEN`     | *string*                            | Bot token issued by [@BotFather](https://t.me/BotFather)                |
 | `API_ADDRESS`  | `http://127.0.0.1:8000`, custom URL | Base URL of the REST backend                                            |
 | `TEST_SESSION` | *string* or empty                   | Session string for the test account (integration)                       |
 | `TEST_CHAT_ID` | *integer*                           | Chat ID used by the test‑suite                                          |

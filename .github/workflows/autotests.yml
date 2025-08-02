@@ -23,7 +23,7 @@ jobs:
       - name: Checkout backend
         uses: actions/checkout@v4
         with:
-          repository: grisha765/appeals-backend
+          repository: ergolyam/appeals-backend
           ref: main
           path: backend
 
